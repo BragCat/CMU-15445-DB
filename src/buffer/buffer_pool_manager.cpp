@@ -46,7 +46,39 @@ namespace cmudb {
      * 4. Update page metadata, read page content from disk file and return page
      * pointer
      */
-    Page *BufferPoolManager::FetchPage(page_id_t page_id) { return nullptr; }
+    Page *BufferPoolManager::FetchPage(page_id_t page_id) {
+        if (page_id == INVALID_PAGE_ID) {
+            return nullptr;
+        }
+        Page *page;
+        bool inHashList = page_table_->Find(page_id, page);
+        if (inHashList) {
+            if (page->pin_count_ == 0) {
+                replacer_->Erase(page);
+            }
+            ++page->pin_count_;
+            return page;
+        } else if (!free_list_->empty()) {
+            page = free_list_->front();
+            free_list_->pop_front();
+        } else {
+            bool lruPop = replacer_->Victim(page);
+            if (!lruPop) {
+                return nullptr;
+            }
+            if (page->is_dirty_) {
+                FlushPage(page->page_id_);
+            }
+            page_table_->Remove(page->page_id_);
+            page->ResetMemory();
+        }
+        disk_manager_->ReadPage(page_id, page->data_);
+        page->page_id_ = page_id;
+        page->is_dirty_ = false;
+        page_table_->Insert(page->page_id_, page);
+        ++page->pin_count_;
+        return page;
+    }
 
     /*
      * Implementation of unpin page
@@ -55,7 +87,19 @@ namespace cmudb {
      * dirty flag of this page
      */
     bool BufferPoolManager::UnpinPage(page_id_t page_id, bool is_dirty) {
-        return false;
+        Page *page;
+        if (page_id == INVALID_PAGE_ID || !page_table_->Find(page_id, page) || page->pin_count_ < 1) {
+            return false;
+        }
+        if (page->is_dirty_ && !is_dirty) {
+            is_dirty = true;
+        }
+        page->is_dirty_ = is_dirty;
+        --page->pin_count_;
+        if (page->pin_count_ == 0) {
+            replacer_->Insert(page);
+        }
+        return true;
     }
 
     /*
@@ -64,7 +108,16 @@ namespace cmudb {
      * if page is not found in page table, return false
      * NOTE: make sure page_id != INVALID_PAGE_ID
      */
-    bool BufferPoolManager::FlushPage(page_id_t page_id) { return false; }
+    bool BufferPoolManager::FlushPage(page_id_t page_id) {
+        Page *page;
+        if (page_id == INVALID_PAGE_ID || page_table_->Find(page_id, page)) {
+            return false;
+        }
+
+        disk_manager_->WritePage(page_id, page->data_);
+        page->is_dirty_ = false;
+        return true;
+    }
 
     /**
      * User should call this method for deleting a page. This routine will call
@@ -74,7 +127,9 @@ namespace cmudb {
      * call disk manager's DeallocatePage() method to delete from disk file. If
      * the page is found within page table, but pin_count != 0, return false
      */
-    bool BufferPoolManager::DeletePage(page_id_t page_id) { return false; }
+    bool BufferPoolManager::DeletePage(page_id_t page_id) {
+        return false;
+    }
 
     /**
      * User should call this method if needs to create a new page. This routine

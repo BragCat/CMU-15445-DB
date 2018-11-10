@@ -17,31 +17,31 @@
 #include "page/page.h"
 
 namespace cmudb {
-class BufferPoolManager {
-public:
-  BufferPoolManager(size_t pool_size, DiskManager *disk_manager,
+    class BufferPoolManager {
+    public:
+        BufferPoolManager(size_t pool_size, DiskManager *disk_manager,
                           LogManager *log_manager = nullptr);
 
-  ~BufferPoolManager();
+        ~BufferPoolManager();
 
-  Page *FetchPage(page_id_t page_id);
+        Page *FetchPage(page_id_t page_id);
 
-  bool UnpinPage(page_id_t page_id, bool is_dirty);
+        bool UnpinPage(page_id_t page_id, bool is_dirty);
 
-  bool FlushPage(page_id_t page_id);
+        bool FlushPage(page_id_t page_id);
 
-  Page *NewPage(page_id_t &page_id);
+        Page *NewPage(page_id_t &page_id);
 
-  bool DeletePage(page_id_t page_id);
+        bool DeletePage(page_id_t page_id);
 
-private:
-  size_t pool_size_; // number of pages in buffer pool
-  Page *pages_;      // array of pages
-  DiskManager *disk_manager_;
-  LogManager *log_manager_;
-  HashTable<page_id_t, Page *> *page_table_; // to keep track of pages
-  Replacer<Page *> *replacer_;   // to find an unpinned page for replacement
-  std::list<Page *> *free_list_; // to find a free page for replacement
-  std::mutex latch_;             // to protect shared data structure
-};
+    private:
+        size_t pool_size_; // number of pages in buffer pool
+        Page *pages_;      // array of pages
+        DiskManager *disk_manager_;
+        LogManager *log_manager_;
+        HashTable<page_id_t, Page *> *page_table_; // to keep track of pages
+        Replacer<Page *> *replacer_;   // to find an unpinned page for replacement
+        std::list<Page *> *free_list_; // to find a free page for replacement
+        std::mutex latch_;             // to protect shared data structure
+    };
 } // namespace cmudb
