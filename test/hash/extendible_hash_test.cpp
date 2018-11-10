@@ -25,7 +25,7 @@ TEST(ExtendibleHashTest, SampleTest) {
   test->Insert(8, "h");
   test->Insert(9, "i");
   EXPECT_EQ(2, test->GetLocalDepth(0));
-  EXPECT_EQ(3, test->GetLocalDepth(1));
+  EXPECT_EQ(2, test->GetLocalDepth(1));
   EXPECT_EQ(2, test->GetLocalDepth(2));
   EXPECT_EQ(2, test->GetLocalDepth(3));
 
