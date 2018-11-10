@@ -6,10 +6,10 @@
 
 namespace cmudb {
 
-/*
- * constructor
- * array_size: fixed array size for each bucket
- */
+    /*
+     * constructor
+     * array_size: fixed array size for each bucket
+     */
     template<typename K, typename V>
     ExtendibleHash<K, V>::ExtendibleHash(size_t size): bucketSize(size) {
         auto *bucketPtr = new Bucket(size, 0);
@@ -17,9 +17,9 @@ namespace cmudb {
         globalDepth = 0;
     }
 
-/*
- * helper function to calculate the hashing address of input key
- */
+    /*
+     * helper function to calculate the hashing address of input key
+     */
     template<typename K, typename V>
     size_t ExtendibleHash<K, V>::HashKey(const K &key) {
         std::hash<K> hashFunc;
@@ -30,35 +30,35 @@ namespace cmudb {
         return (hk >> (bitNum - globalDepth)) & ((1 << globalDepth) - 1);
     }
 
-/*
- * helper function to return global depth of hash table
- * NOTE: you must implement this function in order to pass test
- */
+    /*
+     * helper function to return global depth of hash table
+     * NOTE: you must implement this function in order to pass test
+     */
     template<typename K, typename V>
     int ExtendibleHash<K, V>::GetGlobalDepth() const {
         return globalDepth;
     }
 
-/*
- * helper function to return local depth of one specific bucket
- * NOTE: you must implement this function in order to pass test
- */
+    /*
+     * helper function to return local depth of one specific bucket
+     * NOTE: you must implement this function in order to pass test
+     */
     template<typename K, typename V>
     int ExtendibleHash<K, V>::GetLocalDepth(int bucket_id) const {
-        return bucketList[bucket_id] -> localDepth;
+        return bucketList[bucket_id]->localDepth;
     }
 
-/*
- * helper function to return current number of bucket in hash table
- */
+    /*
+     * helper function to return current number of bucket in hash table
+     */
     template<typename K, typename V>
     int ExtendibleHash<K, V>::GetNumBuckets() const {
         return static_cast<int>(bucketList.size());
     }
 
-/*
- * lookup function to find value associate with input key
- */
+    /*
+     * lookup function to find value associate with input key
+     */
     template<typename K, typename V>
     bool ExtendibleHash<K, V>::Find(const K &key, V &value) {
         mtx.lock();
@@ -74,10 +74,10 @@ namespace cmudb {
         return false;
     }
 
-/*
- * delete <key,value> entry in hash table
- * Shrink & Combination is not required for this project
- */
+    /*
+     * delete <key,value> entry in hash table
+     * Shrink & Combination is not required for this project
+     */
     template<typename K, typename V>
     bool ExtendibleHash<K, V>::Remove(const K &key) {
         mtx.lock();
@@ -94,11 +94,11 @@ namespace cmudb {
         return false;
     }
 
-/*
- * insert <key,value> entry in hash table
- * Split & Redistribute bucket when there is overflow and if necessary increase
- * global depth
- */
+    /*
+     * insert <key,value> entry in hash table
+     * Split & Redistribute bucket when there is overflow and if necessary increase
+     * global depth
+     */
     template<typename K, typename V>
     void ExtendibleHash<K, V>::Insert(const K &key, const V &value) {
         V val;
@@ -160,7 +160,7 @@ namespace cmudb {
     }
 
     template<typename K, typename V>
-    void ExtendibleHash<K, V>::InsertIntoBucket(Bucket * const bucket, const K &key, const V &value) {
+    void ExtendibleHash<K, V>::InsertIntoBucket(Bucket *const bucket, const K &key, const V &value) {
         --bucket->freeCnt;
         bucket->kvs.emplace_back(key, value);
     }
@@ -171,7 +171,7 @@ namespace cmudb {
     template
     class ExtendibleHash<Page *, std::list<Page *>::iterator>;
 
-// test purpose
+    // test purpose
     template
     class ExtendibleHash<int, std::string>;
 
