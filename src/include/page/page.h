@@ -40,6 +40,12 @@ public:
 private:
   // method used by buffer pool manager
   inline void ResetMemory() { memset(data_, 0, PAGE_SIZE); }
+  inline void ResetPage() {
+      page_id_ = INVALID_PAGE_ID;
+      pin_count_ = 0;
+      is_dirty_ = false;
+      ResetMemory();
+  }
   // members
   char data_[PAGE_SIZE]; // actual data
   page_id_t page_id_ = INVALID_PAGE_ID;

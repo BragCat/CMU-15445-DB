@@ -35,6 +35,8 @@ namespace cmudb {
         bool DeletePage(page_id_t page_id);
 
     private:
+        Page *GetPage(); // get page from free_list_ or replacer_, required latch_ locked
+
         size_t pool_size_; // number of pages in buffer pool
         Page *pages_;      // array of pages
         DiskManager *disk_manager_;
