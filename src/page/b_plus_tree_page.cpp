@@ -14,7 +14,7 @@ namespace cmudb {
     }
 
     bool BPlusTreePage::IsRootPage() const {
-        return false;
+        return parent_page_id_ == INVALID_PAGE_ID;
     }
 
     void BPlusTreePage::SetPageType(IndexPageType page_type) {
