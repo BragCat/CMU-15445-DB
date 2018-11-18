@@ -72,7 +72,8 @@ namespace cmudb {
     */
     INDEX_TEMPLATE_ARGUMENTS
     ValueType
-    B_PLUS_TREE_INTERNAL_PAGE_TYPE::Lookup(const KeyType &key, const KeyComparator &comparator) const {
+    B_PLUS_TREE_INTERNAL_PAGE_TYPE::Lookup(const KeyType &key,
+                                           const KeyComparator &comparator) const {
 
         int last_index = -1;
         for (int i = 0; i < GetSize(); ++i) {
@@ -97,9 +98,9 @@ namespace cmudb {
     * NOTE: This method is only called within InsertIntoParent()(b_plus_tree.cpp)
     */
     INDEX_TEMPLATE_ARGUMENTS
-    void B_PLUS_TREE_INTERNAL_PAGE_TYPE::PopulateNewRoot(
-            const ValueType &old_value, const KeyType &new_key,
-            const ValueType &new_value) {
+    void B_PLUS_TREE_INTERNAL_PAGE_TYPE::PopulateNewRoot(const ValueType &old_value,
+                                                         const KeyType &new_key,
+                                                         const ValueType &new_value) {
 
     }
     /*
@@ -108,9 +109,9 @@ namespace cmudb {
     * @return:  new size after insertion
     */
     INDEX_TEMPLATE_ARGUMENTS
-    int B_PLUS_TREE_INTERNAL_PAGE_TYPE::InsertNodeAfter(
-            const ValueType &old_value, const KeyType &new_key,
-            const ValueType &new_value) {
+    int B_PLUS_TREE_INTERNAL_PAGE_TYPE::InsertNodeAfter(const ValueType &old_value,
+                                                        const KeyType &new_key,
+                                                        const ValueType &new_value) {
 
         assert(GetSize() != GetMaxSize());
 
@@ -144,7 +145,7 @@ namespace cmudb {
                                                       BufferPoolManager *buffer_pool_manager) {
 
         assert(GetSize() + size <= GetMaxSize());
-
+        // TODO: may move to the front of page
         int start_index = GetSize();
         for (int i = 0; i < size; ++i) {
             array[start_index + i] = items[i];
@@ -189,7 +190,8 @@ namespace cmudb {
     * update relevant key & value pair in its parent page.
     */
     INDEX_TEMPLATE_ARGUMENTS
-    void B_PLUS_TREE_INTERNAL_PAGE_TYPE::MoveAllTo(BPlusTreeInternalPage *recipient, int index_in_parent,
+    void B_PLUS_TREE_INTERNAL_PAGE_TYPE::MoveAllTo(BPlusTreeInternalPage *recipient,
+                                                   int index_in_parent,
                                                    BufferPoolManager *buffer_pool_manager) {
 
         recipient->CopyAllFrom(array, GetSize(), buffer_pool_manager);
@@ -239,7 +241,8 @@ namespace cmudb {
     * page, then update relevant key & value pair in its parent page.
     */
     INDEX_TEMPLATE_ARGUMENTS
-    void B_PLUS_TREE_INTERNAL_PAGE_TYPE::MoveLastToFrontOf(BPlusTreeInternalPage *recipient, int parent_index,
+    void B_PLUS_TREE_INTERNAL_PAGE_TYPE::MoveLastToFrontOf(BPlusTreeInternalPage *recipient,
+                                                           int parent_index,
                                                            BufferPoolManager *buffer_pool_manager) {
 
         recipient->CopyFirstFrom(array[GetSize() - 1], parent_index, buffer_pool_manager);
@@ -247,7 +250,8 @@ namespace cmudb {
     }
 
     INDEX_TEMPLATE_ARGUMENTS
-    void B_PLUS_TREE_INTERNAL_PAGE_TYPE::CopyFirstFrom(const MappingType &pair, int parent_index,
+    void B_PLUS_TREE_INTERNAL_PAGE_TYPE::CopyFirstFrom(const MappingType &pair,
+                                                       int parent_index,
                                                        BufferPoolManager *buffer_pool_manager) {
 
         for (int i = GetSize(); i > 1; --i) {
