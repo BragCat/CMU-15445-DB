@@ -47,8 +47,7 @@ namespace cmudb {
      * NOTE: This method is only used when generating index iterator
      */
     INDEX_TEMPLATE_ARGUMENTS
-    int B_PLUS_TREE_LEAF_PAGE_TYPE::KeyIndex(
-            const KeyType &key, const KeyComparator &comparator) const {
+    int B_PLUS_TREE_LEAF_PAGE_TYPE::KeyIndex(const KeyType &key, const KeyComparator &comparator) const {
         for (int i = 0; i < GetSize(); ++i) {
             if (comparator(array[i].first, key) >= 0) {
                 return i;
@@ -290,23 +289,13 @@ namespace cmudb {
         return stream.str();
     }
 
-    template
-    class BPlusTreeLeafPage<GenericKey<4>, RID,
-            GenericComparator<4>>;
+    template class BPlusTreeLeafPage<GenericKey<4>, RID, GenericComparator<4>>;
 
-    template
-    class BPlusTreeLeafPage<GenericKey<8>, RID,
-            GenericComparator<8>>;
+    template class BPlusTreeLeafPage<GenericKey<8>, RID, GenericComparator<8>>;
 
-    template
-    class BPlusTreeLeafPage<GenericKey<16>, RID,
-            GenericComparator<16>>;
+    template class BPlusTreeLeafPage<GenericKey<16>, RID, GenericComparator<16>>;
 
-    template
-    class BPlusTreeLeafPage<GenericKey<32>, RID,
-            GenericComparator<32>>;
+    template class BPlusTreeLeafPage<GenericKey<32>, RID, GenericComparator<32>>;
 
-    template
-    class BPlusTreeLeafPage<GenericKey<64>, RID,
-            GenericComparator<64>>;
+    template class BPlusTreeLeafPage<GenericKey<64>, RID, GenericComparator<64>>;
 } // namespace cmudb

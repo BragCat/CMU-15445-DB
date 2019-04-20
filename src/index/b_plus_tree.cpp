@@ -18,13 +18,17 @@ BPLUSTREE_TYPE::BPlusTree(const std::string &name,
                                 const KeyComparator &comparator,
                                 page_id_t root_page_id)
     : index_name_(name), root_page_id_(root_page_id),
-      buffer_pool_manager_(buffer_pool_manager), comparator_(comparator) {}
+      buffer_pool_manager_(buffer_pool_manager), comparator_(comparator) {
+
+}
 
 /*
  * Helper function to decide whether current b+tree is empty
  */
 INDEX_TEMPLATE_ARGUMENTS
-bool BPLUSTREE_TYPE::IsEmpty() const { return true; }
+bool BPLUSTREE_TYPE::IsEmpty() const {
+    return root_page_id_ == INVALID_PAGE_ID;
+}
 /*****************************************************************************
  * SEARCH
  *****************************************************************************/
@@ -37,7 +41,9 @@ INDEX_TEMPLATE_ARGUMENTS
 bool BPLUSTREE_TYPE::GetValue(const KeyType &key,
                               std::vector<ValueType> &result,
                               Transaction *transaction) {
-  return false;
+    bool exist = false;
+
+    return exist;
 }
 
 /*****************************************************************************

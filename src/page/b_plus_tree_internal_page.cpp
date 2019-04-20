@@ -20,7 +20,7 @@ namespace cmudb {
     void B_PLUS_TREE_INTERNAL_PAGE_TYPE::Init(page_id_t page_id, page_id_t parent_id) {
         SetPageType(IndexPageType::INTERNAL_PAGE);
         SetSize(0);
-        SetMaxSize((PAGE_SIZE - sizeof(KeyType)) / sizeof(MappingType));
+        SetMaxSize((PAGE_SIZE + sizeof(KeyType)) / sizeof(MappingType));
         SetPageId(page_id);
         SetParentPageId(parent_id);
     }
@@ -74,17 +74,16 @@ namespace cmudb {
     ValueType
     B_PLUS_TREE_INTERNAL_PAGE_TYPE::Lookup(const KeyType &key,
                                            const KeyComparator &comparator) const {
-
         int last_index = -1;
-        for (int i = 0; i < GetSize(); ++i) {
-            if (!(i != GetSize() - 1 && comparator(array[i + 1].first, key))) {
+        for (int i = 0; i < GetSize() - 1; ++i) {
+            if (comparator(key, array[i + 1].first) < 0) {
                 last_index = i;
                 break;
             }
         }
-
-        assert(last_index != -1);
-
+        if (last_index == -1) {
+            last_index = GetSize() - 1;
+        }
         return last_index;
     }
 
@@ -101,7 +100,9 @@ namespace cmudb {
     void B_PLUS_TREE_INTERNAL_PAGE_TYPE::PopulateNewRoot(const ValueType &old_value,
                                                          const KeyType &new_key,
                                                          const ValueType &new_value) {
-
+        array[0].second = old_value;
+        array[1] = {new_key, new_value};
+        SetSize(2);
     }
     /*
     * Insert new_key & new_value pair right after the pair with its value ==
@@ -113,7 +114,7 @@ namespace cmudb {
                                                         const KeyType &new_key,
                                                         const ValueType &new_value) {
 
-        assert(GetSize() != GetMaxSize());
+        assert(GetSize() < GetMaxSize());
 
         int insert_index = ValueIndex(old_value) + 1;
         for (int i = GetSize(); i > insert_index; --i) {
@@ -134,7 +135,6 @@ namespace cmudb {
     INDEX_TEMPLATE_ARGUMENTS
     void B_PLUS_TREE_INTERNAL_PAGE_TYPE::MoveHalfTo(BPlusTreeInternalPage *recipient,
                                                     BufferPoolManager *buffer_pool_manager) {
-
         int new_size = GetSize() / 2;
         recipient->CopyHalfFrom(array + new_size, GetSize() - new_size, buffer_pool_manager);
         SetSize(new_size);
@@ -163,7 +163,6 @@ namespace cmudb {
     */
     INDEX_TEMPLATE_ARGUMENTS
     void B_PLUS_TREE_INTERNAL_PAGE_TYPE::Remove(int index) {
-
         assert(GetSize() > index);
         for (int i = index; i < GetSize(); ++i) {
             array[i] = array[i + 1];
@@ -193,15 +192,13 @@ namespace cmudb {
     void B_PLUS_TREE_INTERNAL_PAGE_TYPE::MoveAllTo(BPlusTreeInternalPage *recipient,
                                                    int index_in_parent,
                                                    BufferPoolManager *buffer_pool_manager) {
-
-        recipient->CopyAllFrom(array, GetSize(), buffer_pool_manager);
+        recipient->CopyAllFrom(array + 1, GetSize() - 1, buffer_pool_manager);
         SetSize(0);
     }
 
     INDEX_TEMPLATE_ARGUMENTS
     void B_PLUS_TREE_INTERNAL_PAGE_TYPE::CopyAllFrom(MappingType *items, int size,
                                                      BufferPoolManager *buffer_pool_manager) {
-
         int start_index = GetSize();
         for (int i = 0; i < size; ++i) {
             array[start_index + i] = items[i];
@@ -225,12 +222,14 @@ namespace cmudb {
             array[i] = array[i + 1];
         }
         IncreaseSize(-1);
+        if (GetSize() == 1) {
+            SetSize(0);
+        }
     }
 
     INDEX_TEMPLATE_ARGUMENTS
     void B_PLUS_TREE_INTERNAL_PAGE_TYPE::CopyLastFrom(const MappingType &pair,
                                                       BufferPoolManager *buffer_pool_manager) {
-
         int index = GetSize();
         array[index] = pair;
         IncreaseSize(1);
@@ -244,16 +243,17 @@ namespace cmudb {
     void B_PLUS_TREE_INTERNAL_PAGE_TYPE::MoveLastToFrontOf(BPlusTreeInternalPage *recipient,
                                                            int parent_index,
                                                            BufferPoolManager *buffer_pool_manager) {
-
         recipient->CopyFirstFrom(array[GetSize() - 1], parent_index, buffer_pool_manager);
         IncreaseSize(-1);
+        if (GetSize() == 1) {
+            SetSize(0);
+        }
     }
 
     INDEX_TEMPLATE_ARGUMENTS
     void B_PLUS_TREE_INTERNAL_PAGE_TYPE::CopyFirstFrom(const MappingType &pair,
                                                        int parent_index,
                                                        BufferPoolManager *buffer_pool_manager) {
-
         for (int i = GetSize(); i > 1; --i) {
             array[i] = array[i - 1];
         }
